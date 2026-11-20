@@ -1,0 +1,584 @@
+/* Metro Rush: Skyrail Surge - Cartoon Mobile Arcade Stylesheet */
+@import url('https://fonts.googleapis.com/css2?family=Titan+One&family=Fredoka+One&family=Nunito:wght@700;900&display=swap');
+
+:root {
+    --primary-color: #ff3b30;
+    --accent-cyan: #00f0ff;
+    --accent-yellow: #ffcc00;
+    --accent-purple: #9b5de5;
+    --dark-bg: #14111f;
+    --card-bg: rgba(26, 20, 39, 0.92);
+    --border-color: #ffcc00;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--dark-bg);
+    font-family: 'Nunito', sans-serif;
+    touch-action: none;
+}
+
+#game-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
+
+/* UI Layer */
+#ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none;
+    z-index: 10;
+}
+
+.screen {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: auto;
+    transition: opacity 0.25s ease;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* START SCREEN */
+#start-screen {
+    background: radial-gradient(circle at center, rgba(30, 20, 50, 0.75) 0%, rgba(10, 8, 16, 0.95) 100%);
+}
+
+.game-logo {
+    text-align: center;
+    margin-bottom: 25px;
+    animation: float 2.5s ease-in-out infinite;
+}
+
+.logo-sub {
+    font-family: 'Titan One', cursive;
+    font-size: 1.2rem;
+    color: var(--accent-cyan);
+    letter-spacing: 4px;
+    text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+}
+
+.logo-main {
+    font-family: 'Titan One', cursive;
+    font-size: clamp(2.6rem, 8vw, 4.2rem);
+    background: linear-gradient(180deg, #fff700 0%, #ff5e00 50%, #ff0055 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 6px 0 #4a0033) drop-shadow(0 10px 20px rgba(255, 0, 85, 0.6));
+    line-height: 1.1;
+}
+
+.logo-badge {
+    display: inline-block;
+    background: var(--accent-cyan);
+    color: #0b132b;
+    font-family: 'Titan One', cursive;
+    padding: 4px 16px;
+    border-radius: 20px;
+    font-size: 0.95rem;
+    margin-top: 6px;
+    transform: rotate(-3deg);
+    box-shadow: 0 4px 10px rgba(0, 240, 255, 0.4);
+}
+
+.menu-stats-card {
+    display: flex;
+    gap: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.15);
+    border-radius: 18px;
+    padding: 12px 24px;
+    margin-bottom: 30px;
+    backdrop-filter: blur(10px);
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    color: #fff;
+}
+
+.stat-icon {
+    font-size: 1.4rem;
+}
+
+.btn-big-play {
+    font-family: 'Titan One', cursive;
+    font-size: 1.8rem;
+    color: #fff;
+    background: linear-gradient(180deg, #00f0ff 0%, #0077b6 100%);
+    border: none;
+    border-radius: 35px;
+    padding: 16px 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #004b75, 0 14px 25px rgba(0, 240, 255, 0.4);
+    transition: transform 0.1s, box-shadow 0.1s;
+    letter-spacing: 2px;
+}
+
+.btn-big-play:active {
+    transform: translateY(4px);
+    box-shadow: 0 4px 0 #004b75, 0 8px 15px rgba(0, 240, 255, 0.4);
+}
+
+.menu-quick-bar {
+    display: flex;
+    gap: 16px;
+    margin-top: 35px;
+}
+
+.btn-icon-round {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    background: var(--card-bg);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    font-size: 1.4rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    box-shadow: 0 5px 12px rgba(0, 0, 0, 0.4);
+    transition: transform 0.15s;
+}
+
+.btn-icon-round:active {
+    transform: scale(0.92);
+}
+
+/* HUD SCREEN */
+#hud-screen {
+    justify-content: space-between;
+    align-items: stretch;
+    padding: 18px 20px;
+    pointer-events: none;
+}
+
+.hud-top-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    pointer-events: auto;
+}
+
+.hud-left {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.hud-score-box {
+    font-family: 'Titan One', cursive;
+    font-size: clamp(1.8rem, 5vw, 2.6rem);
+    color: #fff;
+    text-shadow: 0 4px 10px rgba(0, 0, 0, 0.7);
+    line-height: 1;
+}
+
+.hud-sub-stats {
+    display: flex;
+    gap: 12px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.05rem;
+    color: var(--accent-yellow);
+}
+
+.hud-distance-tag {
+    color: var(--accent-cyan);
+}
+
+.hud-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.btn-pause-round {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.5);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Active Power-Ups Column */
+.hud-powerups-column {
+    position: absolute;
+    right: 20px;
+    top: 80px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.powerup-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 0, 0, 0.65);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 4px 8px;
+    border-radius: 20px;
+}
+
+.powerup-icon {
+    font-size: 1.2rem;
+}
+
+.powerup-progress-bar {
+    width: 70px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.powerup-progress-fill {
+    width: 100%;
+    height: 100%;
+    background: var(--accent-cyan);
+    transition: width 0.1s linear;
+}
+
+/* Quick Hoverboard Summon button */
+.hud-bottom-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: auto;
+}
+
+.btn-hoverboard-summon {
+    background: linear-gradient(135deg, #00f0ff 0%, #7209b7 100%);
+    border: 3px solid #fff;
+    border-radius: 50px;
+    padding: 10px 22px;
+    color: #fff;
+    font-family: 'Titan One', cursive;
+    font-size: 1rem;
+    box-shadow: 0 6px 15px rgba(0, 240, 255, 0.5);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-hoverboard-summon:active {
+    transform: scale(0.95);
+}
+
+/* TOAST NOTIFICATIONS */
+#toast-notification {
+    position: absolute;
+    top: 75px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+    background: linear-gradient(90deg, #ff007f 0%, #ff5400 100%);
+    color: #fff;
+    font-family: 'Titan One', cursive;
+    font-size: 1.1rem;
+    padding: 8px 24px;
+    border-radius: 25px;
+    box-shadow: 0 6px 20px rgba(255, 0, 127, 0.6);
+    opacity: 0;
+    transition: transform 0.25s, opacity 0.25s;
+    pointer-events: none;
+    z-index: 99;
+}
+
+#toast-notification.show {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+}
+
+/* RESUME COUNTDOWN */
+#resume-countdown {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Titan One', cursive;
+    font-size: 6rem;
+    color: var(--accent-yellow);
+    text-shadow: 0 0 20px rgba(255, 204, 0, 0.8), 0 8px 0 #d00000;
+    z-index: 100;
+    pointer-events: none;
+    animation: popScale 0.8s ease-in-out infinite;
+}
+
+/* GAME OVER SCREEN */
+#game-over-screen {
+    background: rgba(10, 8, 16, 0.88);
+    backdrop-filter: blur(12px);
+}
+
+.game-over-card {
+    background: var(--card-bg);
+    border: 3px solid var(--border-color);
+    border-radius: 26px;
+    padding: 30px 32px;
+    width: min(90vw, 420px);
+    text-align: center;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.7);
+}
+
+.game-over-title {
+    font-family: 'Titan One', cursive;
+    font-size: 2.4rem;
+    color: var(--primary-color);
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+    text-shadow: 0 4px 0 #7a0000;
+}
+
+.new-record-banner {
+    display: inline-block;
+    background: var(--accent-yellow);
+    color: #1a1423;
+    font-family: 'Titan One', cursive;
+    font-size: 0.9rem;
+    padding: 4px 14px;
+    border-radius: 12px;
+    margin-bottom: 18px;
+    animation: pulse 1s infinite alternate;
+}
+
+.go-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.go-stat-box {
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 14px;
+    padding: 12px;
+    text-align: center;
+}
+
+.go-stat-label {
+    font-size: 0.85rem;
+    color: #a0a0b0;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.go-stat-val {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: #fff;
+    margin-top: 4px;
+}
+
+.go-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-go-primary {
+    flex: 2;
+    background: linear-gradient(180deg, #ffcc00 0%, #ff5400 100%);
+    border: none;
+    border-radius: 25px;
+    color: #1a1423;
+    font-family: 'Titan One', cursive;
+    font-size: 1.3rem;
+    padding: 14px 0;
+    box-shadow: 0 6px 0 #b33900;
+    cursor: pointer;
+}
+
+.btn-go-primary:active {
+    transform: translateY(4px);
+    box-shadow: 0 2px 0 #b33900;
+}
+
+.btn-go-secondary {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.12);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    color: #fff;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    cursor: pointer;
+}
+
+/* PAUSE & MODALS */
+#pause-screen {
+    background: rgba(10, 8, 16, 0.85);
+    backdrop-filter: blur(10px);
+}
+
+.modal-card {
+    background: var(--card-bg);
+    border: 3px solid var(--accent-cyan);
+    border-radius: 24px;
+    padding: 26px 28px;
+    width: min(92vw, 440px);
+    text-align: center;
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.modal-title {
+    font-family: 'Titan One', cursive;
+    font-size: 1.8rem;
+    color: #fff;
+}
+
+.btn-close-modal {
+    background: none;
+    border: none;
+    color: #aaa;
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+.btn-pause-action {
+    display: block;
+    width: 100%;
+    margin-bottom: 12px;
+    padding: 14px 0;
+    border-radius: 20px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    border: none;
+    cursor: pointer;
+}
+
+.shop-card-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-height: 55vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.shop-card {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.07);
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 10px 14px;
+    gap: 14px;
+}
+
+.shop-card.selected {
+    border-color: var(--accent-cyan);
+    background: rgba(0, 240, 255, 0.1);
+}
+
+.shop-card-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.6rem;
+}
+
+.shop-card-info {
+    flex: 1;
+    text-align: left;
+}
+
+.shop-card-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.15rem;
+    color: #fff;
+}
+
+.shop-card-desc {
+    font-size: 0.8rem;
+    color: #999;
+}
+
+.tag-equipped {
+    font-family: 'Titan One', cursive;
+    font-size: 0.85rem;
+    color: var(--accent-cyan);
+}
+
+.btn-shop-select, .btn-shop-buy {
+    font-family: 'Fredoka One', cursive;
+    padding: 8px 16px;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-shop-select {
+    background: var(--accent-cyan);
+    color: #000;
+}
+
+.btn-shop-buy {
+    background: var(--accent-yellow);
+    color: #000;
+}
+
+/* Animations */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+}
+
+@keyframes pulse {
+    0% { transform: scale(0.96); }
+    100% { transform: scale(1.04); }
+}
+
+@keyframes popScale {
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+    50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+    100% { transform: translate(-50%, -50%) scale(1.0); opacity: 1; }
+}

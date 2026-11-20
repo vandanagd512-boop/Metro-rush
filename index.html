@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#14111f">
+    <title>Metro Rush: Skyrail Surge</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- 3D Canvas Container -->
+    <div id="game-container"></div>
+
+    <!-- UI Overlay Layer -->
+    <div id="ui-layer">
+
+        <!-- START / MENU SCREEN -->
+        <div id="start-screen" class="screen">
+            <div class="game-logo">
+                <div class="logo-sub">NEON TRANSIT</div>
+                <div class="logo-main">METRO RUSH</div>
+                <div class="logo-badge">SKYRAIL SURGE</div>
+            </div>
+
+            <div class="menu-stats-card">
+                <div class="stat-item">
+                    <span class="stat-icon">🏆</span>
+                    <span id="menu-highscore">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-icon">🪙</span>
+                    <span id="menu-coins">0</span>
+                </div>
+            </div>
+
+            <button id="btn-play" class="btn-big-play">RUN!</button>
+
+            <div class="menu-quick-bar">
+                <button id="btn-shop" class="btn-icon-round" title="Character Locker">🛍️</button>
+                <button id="btn-missions" class="btn-icon-round" title="Missions">🎯</button>
+                <button id="btn-toggle-sfx" class="btn-icon-round" title="SFX Toggle">🔊</button>
+                <button id="btn-toggle-music" class="btn-icon-round" title="Music Toggle">🎵</button>
+            </div>
+        </div>
+
+        <!-- IN-GAME HUD -->
+        <div id="hud-screen" class="screen hidden">
+            <!-- Top stats bar -->
+            <div class="hud-top-bar">
+                <div class="hud-left">
+                    <div id="hud-score" class="hud-score-box">0</div>
+                    <div class="hud-sub-stats">
+                        <span>🪙 <span id="hud-coins">0</span></span>
+                        <span>🏆 <span id="hud-highscore">0</span></span>
+                        <span class="hud-distance-tag">📍 <span id="hud-distance">0m</span></span>
+                    </div>
+                </div>
+                <div class="hud-right">
+                    <button id="btn-pause" class="btn-pause-round">⏸️</button>
+                </div>
+            </div>
+
+            <!-- Active Power-Up Progress Bars -->
+            <div class="hud-powerups-column">
+                <div id="powerup-hoverboard" class="powerup-indicator hidden">
+                    <span class="powerup-icon">🛹</span>
+                    <div class="powerup-progress-bar">
+                        <div class="powerup-progress-fill"></div>
+                    </div>
+                </div>
+                <div id="powerup-magnet" class="powerup-indicator hidden">
+                    <span class="powerup-icon">🧲</span>
+                    <div class="powerup-progress-bar">
+                        <div class="powerup-progress-fill" style="background:#ff0055;"></div>
+                    </div>
+                </div>
+                <div id="powerup-jetpack" class="powerup-indicator hidden">
+                    <span class="powerup-icon">🚀</span>
+                    <div class="powerup-progress-bar">
+                        <div class="powerup-progress-fill" style="background:#00f0ff;"></div>
+                    </div>
+                </div>
+                <div id="powerup-sneakers" class="powerup-indicator hidden">
+                    <span class="powerup-icon">👟</span>
+                    <div class="powerup-progress-bar">
+                        <div class="powerup-progress-fill" style="background:#3a86ff;"></div>
+                    </div>
+                </div>
+                <div id="powerup-multiplier" class="powerup-indicator hidden">
+                    <span class="powerup-icon">✖️2</span>
+                    <div class="powerup-progress-bar">
+                        <div class="powerup-progress-fill" style="background:#ffcc00;"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom controls -->
+            <div class="hud-bottom-bar">
+                <button id="btn-hoverboard-quick" class="btn-hoverboard-summon">
+                    <span>🛹</span> HOVERBOARD
+                </button>
+            </div>
+        </div>
+
+        <!-- PAUSE SCREEN -->
+        <div id="pause-screen" class="screen hidden">
+            <div class="modal-card">
+                <h2 class="modal-title">PAUSED</h2>
+                <div style="margin: 25px 0;">
+                    <button id="btn-resume" class="btn-pause-action" style="background:var(--accent-cyan); color:#000;">RESUME</button>
+                    <button id="btn-menu" class="btn-pause-action" style="background:rgba(255,255,255,0.15); color:#fff;">MAIN MENU</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- RESUME COUNTDOWN -->
+        <div id="resume-countdown" class="hidden">3</div>
+
+        <!-- GAME OVER SCREEN -->
+        <div id="game-over-screen" class="screen hidden">
+            <div class="game-over-card">
+                <div class="game-over-title">CRASHED!</div>
+                <div id="go-new-record" class="new-record-banner hidden">⭐ NEW HIGH SCORE! ⭐</div>
+
+                <div class="go-stats-grid">
+                    <div class="go-stat-box">
+                        <div class="go-stat-label">SCORE</div>
+                        <div id="go-final-score" class="go-stat-val">0</div>
+                    </div>
+                    <div class="go-stat-box">
+                        <div class="go-stat-label">HIGH SCORE</div>
+                        <div id="go-highscore" class="go-stat-val">0</div>
+                    </div>
+                    <div class="go-stat-box">
+                        <div class="go-stat-label">COINS</div>
+                        <div id="go-coins-earned" class="go-stat-val" style="color:var(--accent-yellow);">+0</div>
+                    </div>
+                    <div class="go-stat-box">
+                        <div class="go-stat-label">DISTANCE</div>
+                        <div id="go-distance" class="go-stat-val">0m</div>
+                    </div>
+                </div>
+
+                <div class="go-actions">
+                    <button id="btn-restart" class="btn-go-primary">RUN AGAIN</button>
+                    <button id="btn-gameover-shop" class="btn-go-secondary">🛍️ SHOP</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CHARACTER & HOVERBOARD SHOP MODAL -->
+        <div id="shop-modal" class="screen hidden">
+            <div class="modal-card" style="width: min(94vw, 480px);">
+                <div class="modal-header">
+                    <div class="modal-title">RUNNER LOCKER</div>
+                    <button id="btn-close-shop" class="btn-close-modal">✕</button>
+                </div>
+
+                <div style="margin-bottom: 16px; font-family:'Fredoka One'; font-size:1.2rem; color:var(--accent-yellow);">
+                    YOUR WALLET: 🪙 <span id="shop-coins-val">0</span>
+                </div>
+
+                <div id="shop-char-list" class="shop-card-list">
+                    <!-- Populated dynamically by UI.js -->
+                </div>
+            </div>
+        </div>
+
+        <!-- MISSIONS MODAL -->
+        <div id="missions-modal" class="screen hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">MISSIONS</div>
+                    <button id="btn-close-missions" class="btn-close-modal">✕</button>
+                </div>
+
+                <div class="shop-card-list">
+                    <div class="shop-card">
+                        <div class="shop-card-badge" style="background:#ff9500">🎯</div>
+                        <div class="shop-card-info">
+                            <div class="shop-card-name">Coin Collector</div>
+                            <div class="shop-card-desc">Collect 100 coins in a single run</div>
+                        </div>
+                        <div class="shop-card-action">
+                            <span class="tag-equipped">🪙 100</span>
+                        </div>
+                    </div>
+                    <div class="shop-card">
+                        <div class="shop-card-badge" style="background:#00f0ff">⚡</div>
+                        <div class="shop-card-info">
+                            <div class="shop-card-name">Train Dodger</div>
+                            <div class="shop-card-desc">Survive 1,000 meters in the metro</div>
+                        </div>
+                        <div class="shop-card-action">
+                            <span class="tag-equipped">🪙 150</span>
+                        </div>
+                    </div>
+                    <div class="shop-card">
+                        <div class="shop-card-badge" style="background:#af52de">🛹</div>
+                        <div class="shop-card-info">
+                            <div class="shop-card-name">Skyrail Rider</div>
+                            <div class="shop-card-desc">Activate Hoverboard & survive a crash</div>
+                        </div>
+                        <div class="shop-card-action">
+                            <span class="tag-equipped">🪙 200</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TOAST NOTIFICATION -->
+        <div id="toast-notification" class="hidden">🔥 MAGNET ACTIVATED!</div>
+
+    </div>
+
+    <!-- Scripts (Ordered for dependency resolution) -->
+    <script src="libs/three.min.js"></script>
+    <script src="js/audio.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/input.js"></script>
+    <script src="js/game.js"></script>
+    <script src="js/ui.js"></script>
+
+    <script>
+        // Bootstrap Application
+        window.addEventListener('DOMContentLoaded', () => {
+            const container = document.getElementById('game-container');
+            window.game = new MetroGame();
+            window.game.init(container);
+            window.inputManager.init(container);
+            window.ui.init();
+        });
+    </script>
+</body>
+</html>
