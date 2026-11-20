@@ -12,6 +12,7 @@ const ASSETS_TO_CACHE = [
   './js/input.js',
   './js/game.js',
   './js/ui.js',
+  './assets/app-icon.jpg',
   './assets/icon-192.svg',
   './assets/icon-512.svg'
 ];
