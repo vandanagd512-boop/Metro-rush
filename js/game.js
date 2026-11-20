@@ -719,6 +719,20 @@ class MetroGame {
             this.devilTargetDist = 4.8;
         }
 
+        // Devil threat warning vignette
+        if (this.devilChaseDist < 2.6) {
+            if (!this.devilWarningActive) {
+                this.devilWarningActive = true;
+                window.sounds.playDevilGrowl();
+                if (window.ui) window.ui.showDevilWarning(true);
+            }
+        } else if (this.devilChaseDist >= 3.6) {
+            if (this.devilWarningActive) {
+                this.devilWarningActive = false;
+                if (window.ui) window.ui.showDevilWarning(false);
+            }
+        }
+
         // Devil position follows runner smoothly
         this.devil.position.x += (this.playerPos.x - this.devil.position.x) * 8 * delta;
         this.devil.position.y = this.playerPos.y + 0.35 + Math.sin(this.runCycle * 1.5) * 0.15;
@@ -749,7 +763,8 @@ class MetroGame {
                 this.weatherState = 'rain';
                 this.scene.background.setHex(0x0a1128);
                 this.scene.fog.color.setHex(0x0a1128);
-                if (window.ui) window.ui.showToast('🌧️ ENTERING CYBER RAINSTORM!');
+                window.sounds.playStageFanfare();
+                if (window.ui) window.ui.showStageBanner('STAGE 3: RAINSTORM EXPRESS');
             }
             // Spawn rain streaks past runner
             this.particles.createRainStreak(this.playerPos);
@@ -758,7 +773,8 @@ class MetroGame {
                 this.weatherState = 'midnight';
                 this.scene.background.setHex(0x080417);
                 this.scene.fog.color.setHex(0x080417);
-                if (window.ui) window.ui.showToast('🌌 MIDNIGHT CYBER TRANSIT!');
+                window.sounds.playStageFanfare();
+                if (window.ui) window.ui.showStageBanner('STAGE 2: MIDNIGHT SURGE');
             }
         }
     }
@@ -864,6 +880,8 @@ class MetroGame {
         // Game Over! Devil catches player!
         this.isRunning = false;
         this.devilTargetDist = 0.5;
+        this.devilWarningActive = false;
+        if (window.ui) window.ui.showDevilWarning(false);
         window.sounds.stopMusic();
         window.sounds.playCrash();
         this.particles.createCrashExplosion(this.player.position);

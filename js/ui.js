@@ -8,7 +8,14 @@ class UIManager {
 
         this.selectedChar = localStorage.getItem('metrorush_selected_char') || 'dash';
         this.selectedBoard = localStorage.getItem('metrorush_selected_board') || 'neon';
-        this.shopTab = 'chars'; // 'chars' or 'boards'
+        this.shopTab = 'chars'; // 'chars', 'boards', or 'upgrades'
+
+        this.upgrades = JSON.parse(localStorage.getItem('metrorush_upgrades') || JSON.stringify({
+            magnet: 1,
+            jetpack: 1,
+            slowmo: 1,
+            blast: 1
+        }));
 
         this.toastTimer = null;
         this.countdownTimer = null;
@@ -92,22 +99,40 @@ class UIManager {
         const btnSpin = document.getElementById('btn-spin-wheel');
         if (btnSpin) btnSpin.addEventListener('click', () => this.spinWheel());
 
-        // Shop Tabs (Characters vs Hoverboards)
+        // Shop Tabs (Characters vs Hoverboards vs Upgrades)
         const tabChars = document.getElementById('tab-shop-chars');
         const tabBoards = document.getElementById('tab-shop-boards');
+        const tabUpgrades = document.getElementById('tab-shop-upgrades');
         if (tabChars && tabBoards) {
             tabChars.addEventListener('click', () => {
                 this.shopTab = 'chars';
                 tabChars.classList.add('active');
                 tabBoards.classList.remove('active');
+                if (tabUpgrades) tabUpgrades.classList.remove('active');
                 this.renderShop();
             });
             tabBoards.addEventListener('click', () => {
                 this.shopTab = 'boards';
                 tabBoards.classList.add('active');
                 tabChars.classList.remove('active');
+                if (tabUpgrades) tabUpgrades.classList.remove('active');
                 this.renderShop();
             });
+            if (tabUpgrades) {
+                tabUpgrades.addEventListener('click', () => {
+                    this.shopTab = 'upgrades';
+                    tabUpgrades.classList.add('active');
+                    tabChars.classList.remove('active');
+                    tabBoards.classList.remove('active');
+                    this.renderShop();
+                });
+            }
+        }
+
+        // Share score button on Game Over screen
+        const btnShare = document.getElementById('btn-share-score');
+        if (btnShare) {
+            btnShare.addEventListener('click', () => this.shareScore());
         }
 
         // Save Leaderboard score from Game Over screen
@@ -168,8 +193,60 @@ class UIManager {
         if (window.game) {
             window.game.selectedCharacter = this.selectedChar;
             window.game.selectedBoard = this.selectedBoard;
+            this.applyUpgradesToGame();
             window.game.start();
         }
+    }
+
+    applyUpgradesToGame() {
+        if (!window.game) return;
+        window.game.activePowerups.magnet.maxTimer = 15 + (this.upgrades.magnet - 1) * 3.5;
+        window.game.activePowerups.jetpack.maxTimer = 12 + (this.upgrades.jetpack - 1) * 3;
+        window.game.activePowerups.slowmo.maxTimer = 8 + (this.upgrades.slowmo - 1) * 2;
+        window.game.activePowerups.blast.maxTimer = 10 + (this.upgrades.blast - 1) * 2.5;
+    }
+
+    shareScore() {
+        const score = window.game ? window.game.score : this.highScore;
+        const text = `🚇 I scored ${score.toLocaleString()} points escaping the Devil in Metro Rush: Skyrail Surge! Can you beat me? Play now: ${window.location.href}`;
+        if (navigator.share) {
+            navigator.share({
+                title: 'Metro Rush Challenge',
+                text: text,
+                url: window.location.href
+            }).catch(() => {});
+        } else if (navigator.clipboard) {
+            navigator.clipboard.writeText(text).then(() => {
+                this.showToast('📋 SCORE COPIED TO CLIPBOARD!');
+            }).catch(() => {
+                this.showToast('🏆 Score: ' + score.toLocaleString());
+            });
+        }
+    }
+
+    showDevilWarning(show) {
+        const vignette = document.getElementById('devil-vignette');
+        const alertTag = document.getElementById('devil-alert-tag');
+        if (!vignette) return;
+        if (show) {
+            vignette.classList.add('active');
+            if (alertTag) alertTag.classList.remove('hidden');
+        } else {
+            vignette.classList.remove('active');
+            if (alertTag) alertTag.classList.add('hidden');
+        }
+    }
+
+    showStageBanner(text) {
+        const banner = document.getElementById('stage-progression-banner');
+        if (!banner) return;
+        banner.textContent = text;
+        banner.classList.remove('hidden');
+        banner.classList.add('animate-banner');
+        setTimeout(() => {
+            banner.classList.remove('animate-banner');
+            banner.classList.add('hidden');
+        }, 3200);
     }
 
     returnToMenu() {
@@ -332,7 +409,7 @@ class UIManager {
                 `;
                 charList.appendChild(card);
             });
-        } else {
+        } else if (this.shopTab === 'boards') {
             // Hoverboards Tab
             const boards = [
                 { id: 'neon', name: 'Neon Cruiser', cost: 0, desc: 'Classic Extra-Life Shield', color: '#00f0ff', perk: 'Shield' },
@@ -361,7 +438,56 @@ class UIManager {
                 `;
                 charList.appendChild(card);
             });
+        } else {
+            // Upgrades Tab (Coin Sink)
+            const upgList = [
+                { id: 'magnet', name: 'Coin Magnet', desc: 'Increases magnetic duration', icon: '🧲', color: '#ff0055' },
+                { id: 'jetpack', name: 'Jetpack Rocket', desc: 'Increases sky flight duration', icon: '🚀', color: '#00f0ff' },
+                { id: 'slowmo', name: 'Chrono Slow-Mo', desc: 'Increases matrix dodge duration', icon: '⏱️', color: '#00f5d4' },
+                { id: 'blast', name: 'Shockwave Core', desc: 'Increases barrier smashing time', icon: '💥', color: '#ff5400' }
+            ];
+
+            upgList.forEach(u => {
+                const currentLvl = this.upgrades[u.id] || 1;
+                const isMax = currentLvl >= 5;
+                const cost = currentLvl * 100;
+
+                const card = document.createElement('div');
+                card.className = 'shop-card';
+                card.innerHTML = `
+                    <div class="shop-card-badge" style="background:${u.color}">${u.icon}</div>
+                    <div class="shop-card-info">
+                        <div class="shop-card-name">${u.name} <span class="badge-perk">Lv ${currentLvl}/5</span></div>
+                        <div class="shop-card-desc">${u.desc}</div>
+                    </div>
+                    <div class="shop-card-action">
+                        ${isMax ? '<span class="tag-equipped">MAX LEVEL</span>' : 
+                                  `<button class="btn-shop-upgrade" data-id="${u.id}" data-cost="${cost}">🪙 ${cost}</button>`}
+                    </div>
+                `;
+                charList.appendChild(card);
+            });
         }
+
+        // Bind clicks
+        charList.querySelectorAll('.btn-shop-upgrade').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = e.target.getAttribute('data-id');
+                const cost = parseInt(e.target.getAttribute('data-cost'), 10);
+                if (this.totalCoins >= cost) {
+                    this.totalCoins -= cost;
+                    this.upgrades[id] = (this.upgrades[id] || 1) + 1;
+                    localStorage.setItem('metrorush_total_coins', this.totalCoins.toString());
+                    localStorage.setItem('metrorush_upgrades', JSON.stringify(this.upgrades));
+                    this.applyUpgradesToGame();
+                    window.sounds.playPowerup();
+                    this.showToast(`⚡ ${id.toUpperCase()} UPGRADED TO LV ${this.upgrades[id]}!`);
+                    this.renderShop();
+                } else {
+                    alert('Not enough coins to upgrade!');
+                }
+            });
+        });
 
         // Bind clicks
         charList.querySelectorAll('.btn-shop-select').forEach(btn => {
@@ -480,6 +606,11 @@ class UIManager {
         wheelEl.style.transition = 'transform 3.5s cubic-bezier(0.15, 0.9, 0.25, 1)';
         wheelEl.style.transform = `rotate(${degrees}deg)`;
         window.sounds.playSlide();
+
+        let clickInterval = setInterval(() => {
+            if (window.sounds) window.sounds.playWheelClick();
+        }, 130);
+        setTimeout(() => clearInterval(clickInterval), 3200);
 
         setTimeout(() => {
             this.isSpinning = false;

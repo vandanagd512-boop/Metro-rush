@@ -13,6 +13,13 @@
     <!-- 3D Canvas Container -->
     <div id="game-container"></div>
 
+    <!-- Devil Threat Red Vignette & Alert Overlay -->
+    <div id="devil-vignette" class="devil-vignette-overlay"></div>
+    <div id="devil-alert-tag" class="devil-alert-banner hidden">⚠️ DEVIL IS ON YOUR HEELS!</div>
+
+    <!-- Stage Progression Banner -->
+    <div id="stage-progression-banner" class="stage-banner hidden">STAGE 2: MIDNIGHT SURGE</div>
+
     <!-- UI Overlay Layer -->
     <div id="ui-layer">
 
@@ -168,6 +175,7 @@
 
                 <div class="go-actions">
                     <button id="btn-restart" class="btn-go-primary">RUN AGAIN</button>
+                    <button id="btn-share-score" class="btn-go-secondary" style="background:#00f0ff; color:#0b132b; font-family:'Titan One';">📲 SHARE</button>
                     <button id="btn-gameover-shop" class="btn-go-secondary">🛍️ SHOP</button>
                 </div>
             </div>
@@ -183,8 +191,9 @@
 
                 <!-- Tabs -->
                 <div class="shop-tabs">
-                    <button id="tab-shop-chars" class="shop-tab-btn active">🏃 CHARACTERS</button>
-                    <button id="tab-shop-boards" class="shop-tab-btn">🛹 HOVERBOARDS</button>
+                    <button id="tab-shop-chars" class="shop-tab-btn active">🏃 RUNNERS</button>
+                    <button id="tab-shop-boards" class="shop-tab-btn">🛹 BOARDS</button>
+                    <button id="tab-shop-upgrades" class="shop-tab-btn">⚡ UPGRADES</button>
                 </div>
 
                 <div style="margin: 12px 0 16px; font-family:'Fredoka One'; font-size:1.15rem; color:var(--accent-yellow);">
