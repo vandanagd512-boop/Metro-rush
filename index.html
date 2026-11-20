@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#14111f">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="assets/icon-192.svg">
     <title>Metro Rush: Skyrail Surge</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -36,7 +38,9 @@
             <button id="btn-play" class="btn-big-play">RUN!</button>
 
             <div class="menu-quick-bar">
-                <button id="btn-shop" class="btn-icon-round" title="Character Locker">🛍️</button>
+                <button id="btn-shop" class="btn-icon-round" title="Locker & Shop">🛍️</button>
+                <button id="btn-leaderboard" class="btn-icon-round" title="Leaderboard">🏆</button>
+                <button id="btn-wheel" class="btn-icon-round" title="Lucky Spin Wheel">🎡</button>
                 <button id="btn-missions" class="btn-icon-round" title="Missions">🎯</button>
                 <button id="btn-toggle-sfx" class="btn-icon-round" title="SFX Toggle">🔊</button>
                 <button id="btn-toggle-music" class="btn-icon-round" title="Music Toggle">🎵</button>
@@ -48,7 +52,10 @@
             <!-- Top stats bar -->
             <div class="hud-top-bar">
                 <div class="hud-left">
-                    <div id="hud-score" class="hud-score-box">0</div>
+                    <div style="display:flex; align-items:center; gap:10px;">
+                        <div id="hud-score" class="hud-score-box">0</div>
+                        <div id="hud-combo-badge" class="hud-combo-tag hidden">2X COMBO!</div>
+                    </div>
                     <div class="hud-sub-stats">
                         <span>🪙 <span id="hud-coins">0</span></span>
                         <span>🏆 <span id="hud-highscore">0</span></span>
@@ -92,6 +99,18 @@
                         <div class="powerup-progress-fill" style="background:#ffcc00;"></div>
                     </div>
                 </div>
+                <div id="powerup-slowmo" class="powerup-indicator hidden">
+                    <span class="powerup-icon">⏱️</span>
+                    <div class="powerup-progress-bar">
+                        <div class="powerup-progress-fill" style="background:#00f5d4;"></div>
+                    </div>
+                </div>
+                <div id="powerup-blast" class="powerup-indicator hidden">
+                    <span class="powerup-icon">💥</span>
+                    <div class="powerup-progress-bar">
+                        <div class="powerup-progress-fill" style="background:#ff5400;"></div>
+                    </div>
+                </div>
             </div>
 
             <!-- Bottom controls -->
@@ -119,7 +138,7 @@
         <!-- GAME OVER SCREEN -->
         <div id="game-over-screen" class="screen hidden">
             <div class="game-over-card">
-                <div class="game-over-title">CRASHED!</div>
+                <div class="game-over-title">DEVIL CAUGHT YOU!</div>
                 <div id="go-new-record" class="new-record-banner hidden">⭐ NEW HIGH SCORE! ⭐</div>
 
                 <div class="go-stats-grid">
@@ -141,6 +160,12 @@
                     </div>
                 </div>
 
+                <!-- Submit score to leaderboard -->
+                <div class="go-submit-box">
+                    <input type="text" id="input-player-name" placeholder="Enter Your Nickname" maxlength="12" class="input-nickname">
+                    <button id="btn-save-score" class="btn-submit-score">SUBMIT 🏆</button>
+                </div>
+
                 <div class="go-actions">
                     <button id="btn-restart" class="btn-go-primary">RUN AGAIN</button>
                     <button id="btn-gameover-shop" class="btn-go-secondary">🛍️ SHOP</button>
@@ -148,21 +173,59 @@
             </div>
         </div>
 
-        <!-- CHARACTER & HOVERBOARD SHOP MODAL -->
+        <!-- SHOP MODAL (Characters & Specialty Hoverboards) -->
         <div id="shop-modal" class="screen hidden">
             <div class="modal-card" style="width: min(94vw, 480px);">
                 <div class="modal-header">
-                    <div class="modal-title">RUNNER LOCKER</div>
+                    <div class="modal-title">LOCKER</div>
                     <button id="btn-close-shop" class="btn-close-modal">✕</button>
                 </div>
 
-                <div style="margin-bottom: 16px; font-family:'Fredoka One'; font-size:1.2rem; color:var(--accent-yellow);">
+                <!-- Tabs -->
+                <div class="shop-tabs">
+                    <button id="tab-shop-chars" class="shop-tab-btn active">🏃 CHARACTERS</button>
+                    <button id="tab-shop-boards" class="shop-tab-btn">🛹 HOVERBOARDS</button>
+                </div>
+
+                <div style="margin: 12px 0 16px; font-family:'Fredoka One'; font-size:1.15rem; color:var(--accent-yellow);">
                     YOUR WALLET: 🪙 <span id="shop-coins-val">0</span>
                 </div>
 
                 <div id="shop-char-list" class="shop-card-list">
                     <!-- Populated dynamically by UI.js -->
                 </div>
+            </div>
+        </div>
+
+        <!-- LEADERBOARD MODAL -->
+        <div id="leaderboard-modal" class="screen hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🏆 HALL OF FAME</div>
+                    <button id="btn-close-leaderboard" class="btn-close-modal">✕</button>
+                </div>
+                <div id="leaderboard-list" class="leaderboard-container">
+                    <!-- Populated dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <!-- LUCKY SPIN WHEEL MODAL -->
+        <div id="wheel-modal" class="screen hidden">
+            <div class="modal-card">
+                <div class="modal-header">
+                    <div class="modal-title">🎡 LUCKY SPIN</div>
+                    <button id="btn-close-wheel" class="btn-close-modal">✕</button>
+                </div>
+
+                <div class="wheel-wrapper">
+                    <div class="wheel-pointer">▼</div>
+                    <div id="lucky-wheel-disc" class="wheel-disc">
+                        <div class="wheel-center-hub">⭐</div>
+                    </div>
+                </div>
+
+                <button id="btn-spin-wheel" class="btn-big-play" style="margin-top:20px; font-size:1.3rem; padding:12px 35px;">SPIN!</button>
             </div>
         </div>
 
@@ -178,8 +241,8 @@
                     <div class="shop-card">
                         <div class="shop-card-badge" style="background:#ff9500">🎯</div>
                         <div class="shop-card-info">
-                            <div class="shop-card-name">Coin Collector</div>
-                            <div class="shop-card-desc">Collect 100 coins in a single run</div>
+                            <div class="shop-card-name">Devil Dodger</div>
+                            <div class="shop-card-desc">Escape the Devil after 3 stumbles</div>
                         </div>
                         <div class="shop-card-action">
                             <span class="tag-equipped">🪙 100</span>
@@ -188,18 +251,18 @@
                     <div class="shop-card">
                         <div class="shop-card-badge" style="background:#00f0ff">⚡</div>
                         <div class="shop-card-info">
-                            <div class="shop-card-name">Train Dodger</div>
-                            <div class="shop-card-desc">Survive 1,000 meters in the metro</div>
+                            <div class="shop-card-name">Rainstorm Surfer</div>
+                            <div class="shop-card-desc">Survive 1,400 meters into rain weather</div>
                         </div>
                         <div class="shop-card-action">
                             <span class="tag-equipped">🪙 150</span>
                         </div>
                     </div>
                     <div class="shop-card">
-                        <div class="shop-card-badge" style="background:#af52de">🛹</div>
+                        <div class="shop-card-badge" style="background:#af52de">💥</div>
                         <div class="shop-card-info">
-                            <div class="shop-card-name">Skyrail Rider</div>
-                            <div class="shop-card-desc">Activate Hoverboard & survive a crash</div>
+                            <div class="shop-card-name">Barrier Buster</div>
+                            <div class="shop-card-desc">Shatter 5 hurdles with Shockwave Battery</div>
                         </div>
                         <div class="shop-card-action">
                             <span class="tag-equipped">🪙 200</span>

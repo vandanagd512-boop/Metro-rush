@@ -42,8 +42,23 @@ class MetroGame {
             magnet: { active: false, timer: 0, maxTimer: 15 },
             jetpack: { active: false, timer: 0, maxTimer: 12 },
             sneakers: { active: false, timer: 0, maxTimer: 16 },
-            multiplier: { active: false, timer: 0, maxTimer: 18 }
+            multiplier: { active: false, timer: 0, maxTimer: 18 },
+            slowmo: { active: false, timer: 0, maxTimer: 8 },
+            blast: { active: false, timer: 0, maxTimer: 10 }
         };
+
+        // Devil Chaser System
+        this.devil = null;
+        this.devilChaseDist = 4.8;
+        this.devilTargetDist = 4.8;
+        this.cleanRunTimer = 0;
+
+        // Dynamic Weather & Environment Cycle
+        this.weatherState = 'sunset';
+
+        // Near-Miss Combo System
+        this.comboCount = 0;
+        this.lastNearMissZ = 0;
 
         // Track & Objects Management
         this.trackChunks = [];
@@ -242,6 +257,17 @@ class MetroGame {
         this.player.position.set(0, 0, 0);
         this.scene.add(this.player);
 
+        // Spawn Devil Chaser
+        if (this.devil) this.scene.remove(this.devil);
+        this.devil = this.models.createDevil();
+        this.devilChaseDist = 4.8;
+        this.devilTargetDist = 4.8;
+        this.cleanRunTimer = 0;
+        this.comboCount = 0;
+        this.weatherState = 'sunset';
+        this.devil.position.set(0, 0.4, 4.8);
+        this.scene.add(this.devil);
+
         // Generate starting tracks (initial safe runway)
         this.nextChunkZ = 0;
         for (let i = 0; i < 6; i++) {
@@ -341,9 +367,9 @@ class MetroGame {
         }
 
         // Randomly spawn Power-Up
-        if (Math.random() < 0.3) {
+        if (Math.random() < 0.35) {
             const freeLane = lanes[Math.floor(Math.random() * 3)];
-            const types = ['magnet', 'jetpack', 'sneakers', 'multiplier'];
+            const types = ['magnet', 'jetpack', 'sneakers', 'multiplier', 'slowmo', 'blast', 'mystery'];
             const chosenType = types[Math.floor(Math.random() * types.length)];
             const powerup = this.models.createPowerup(chosenType);
             powerup.position.set(freeLane, 1.2, chunkCenterZ + (Math.random() - 0.5) * 20);
@@ -395,15 +421,20 @@ class MetroGame {
     }
 
     update(delta) {
+        // Slow-Mo powerup effect
+        const timeFactor = this.activePowerups.slowmo.active ? 0.5 : 1.0;
+        const effectiveDelta = delta * timeFactor;
+
         // 1. Dynamic speed progression
-        this.speed = Math.min(this.maxSpeed, this.speed + this.acceleration * delta);
-        const forwardStep = this.speed * delta;
+        this.speed = Math.min(this.maxSpeed, this.speed + this.acceleration * effectiveDelta);
+        const forwardStep = this.speed * effectiveDelta;
         this.distance += forwardStep;
         this.playerPos.z -= forwardStep;
 
-        // 2. Score progression
-        const activeMultiplier = this.multiplier * (this.activePowerups.multiplier.active ? 2 : 1);
-        this.score += Math.floor(this.speed * delta * activeMultiplier * 2);
+        // 2. Score progression (incorporates Near-Miss Combo boost)
+        const comboBoost = Math.max(1, Math.min(5, Math.floor(this.comboCount / 2) + 1));
+        const activeMultiplier = this.multiplier * (this.activePowerups.multiplier.active ? 2 : 1) * comboBoost;
+        this.score += Math.floor(this.speed * effectiveDelta * activeMultiplier * 2);
 
         // 3. Smooth Lane switching (Lerp)
         this.playerPos.x += (this.targetLaneX - this.playerPos.x) * 16 * delta;
@@ -414,30 +445,44 @@ class MetroGame {
         // 5. Physics & Vertical Ground Checking
         this.updatePhysics(delta);
 
+        // Specialty Board Perks: Glider float & Firestorm flame trail
+        if (this.activePowerups.hoverboard.active) {
+            if (this.selectedBoard === 'glider' && this.velocityY < 0) {
+                this.velocityY += 18 * delta; // Air glide
+            } else if (this.selectedBoard === 'firestorm') {
+                this.particles.createDevilFlames(this.player.position); // Fire exhaust trail
+            }
+        }
+
         // 6. Rail Grinding Check (Middle rail with Hoverboard or feet)
         this.checkRailGrind();
 
         // 7. Update Moving Trains
-        this.updateTrains(delta);
+        this.updateTrains(effectiveDelta);
 
         // 8. Update Collectibles & Coin Magnet
         this.updateCollectibles(delta);
 
-        // 9. Collision Detection
+        // 9. Collision Detection & Near-Miss Detection
         this.checkCollisions();
+        this.checkNearMisses();
 
-        // 10. Update Player Rig Animations
+        // 10. Update Player & Devil Rig Animations
         this.updatePlayerAnimations(delta);
+        this.updateDevil(delta);
 
-        // 11. Camera Follow with Smooth Spring Dampening
+        // 11. Dynamic Weather Transition (Sunset -> Midnight -> Rainstorm)
+        this.updateWeather(delta);
+
+        // 12. Camera Follow with Smooth Spring Dampening
         this.updateCamera(delta);
 
-        // 12. Recycle old chunks & spawn new ones ahead
+        // 13. Recycle old chunks & spawn new ones ahead
         this.updateTracks();
 
-        // 13. Update UI
+        // 14. Update UI
         if (window.ui) {
-            window.ui.updateHUD(this.score, this.coins, Math.floor(this.distance));
+            window.ui.updateHUD(this.score, this.coins, Math.floor(this.distance), comboBoost);
         }
     }
 
@@ -606,6 +651,24 @@ class MetroGame {
     activatePowerup(type) {
         window.sounds.playPowerup();
         const p = this.activePowerups[type];
+        if (type === 'mystery') {
+            const roll = Math.random();
+            if (roll < 0.45) {
+                const bonusCoins = 150 + Math.floor(Math.random() * 200);
+                this.coins += bonusCoins;
+                this.score += bonusCoins * 50;
+                window.sounds.playCoin();
+                if (window.ui) window.ui.showToast(`🎁 MYSTERY JACKPOT: +${bonusCoins} COINS!`);
+            } else if (roll < 0.8) {
+                this.activateHoverboard();
+                if (window.ui) window.ui.showToast('🎁 MYSTERY BOX: FREE HOVERBOARD!');
+            } else {
+                this.activatePowerup('multiplier');
+                if (window.ui) window.ui.showToast('🎁 MYSTERY BOX: 2X MULTIPLIER!');
+            }
+            return;
+        }
+
         if (p) {
             p.active = true;
             p.timer = p.maxTimer;
@@ -617,6 +680,86 @@ class MetroGame {
 
         if (window.ui) {
             window.ui.showToast(`🔥 ${type.toUpperCase()} ACTIVATED!`);
+        }
+    }
+
+    checkNearMisses() {
+        const pZ = this.playerPos.z;
+        const pX = this.playerPos.x;
+
+        // Check if player closely dodged an obstacle without crashing
+        for (let ob of this.obstacles) {
+            const dz = pZ - ob.position.z;
+            const dx = Math.abs(pX - ob.position.x);
+
+            // Just passed the obstacle within close clearance
+            if (dz < -0.2 && dz > -2.0 && dx > 1.2 && dx < 2.8) {
+                if (ob.position.z !== this.lastNearMissZ) {
+                    this.lastNearMissZ = ob.position.z;
+                    this.comboCount++;
+                    this.score += 250 * Math.min(this.comboCount, 5);
+                    if (window.ui) {
+                        window.ui.showToast(`⚡ ${this.comboCount}X NEAR-MISS COMBO!`);
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    updateDevil(delta) {
+        if (!this.devil) return;
+
+        // Lerp Devil distance behind player
+        this.devilChaseDist += (this.devilTargetDist - this.devilChaseDist) * 3 * delta;
+
+        // Clean running gradually pushes Devil back
+        this.cleanRunTimer += delta;
+        if (this.cleanRunTimer > 3.5 && this.devilTargetDist < 4.8) {
+            this.devilTargetDist = 4.8;
+        }
+
+        // Devil position follows runner smoothly
+        this.devil.position.x += (this.playerPos.x - this.devil.position.x) * 8 * delta;
+        this.devil.position.y = this.playerPos.y + 0.35 + Math.sin(this.runCycle * 1.5) * 0.15;
+        this.devil.position.z = this.playerPos.z + this.devilChaseDist;
+
+        // Devil animations: Flapping bat wings and swinging tail
+        const d = this.devil;
+        if (d.wingPivotL && d.wingPivotR) {
+            const flap = Math.sin(this.runCycle * 4) * 0.45;
+            d.wingPivotL.rotation.y = flap;
+            d.wingPivotR.rotation.y = -flap;
+        }
+        if (d.tailPivot) {
+            d.tailPivot.rotation.z = Math.sin(this.runCycle * 3) * 0.3;
+        }
+        if (d.rightArmPivot) {
+            d.rightArmPivot.rotation.x = -0.4 + Math.sin(this.runCycle * 2) * 0.2;
+        }
+
+        // Emit fiery embers
+        this.particles.createDevilFlames(this.devil.position);
+    }
+
+    updateWeather(delta) {
+        // Distance milestones: Sunset (0-600m), Midnight (600-1400m), Rainstorm (1400m+)
+        if (this.distance > 1400) {
+            if (this.weatherState !== 'rain') {
+                this.weatherState = 'rain';
+                this.scene.background.setHex(0x0a1128);
+                this.scene.fog.color.setHex(0x0a1128);
+                if (window.ui) window.ui.showToast('🌧️ ENTERING CYBER RAINSTORM!');
+            }
+            // Spawn rain streaks past runner
+            this.particles.createRainStreak(this.playerPos);
+        } else if (this.distance > 600) {
+            if (this.weatherState !== 'midnight') {
+                this.weatherState = 'midnight';
+                this.scene.background.setHex(0x080417);
+                this.scene.fog.color.setHex(0x080417);
+                if (window.ui) window.ui.showToast('🌌 MIDNIGHT CYBER TRANSIT!');
+            }
         }
     }
 
@@ -662,6 +805,18 @@ class MetroGame {
             const dz = Math.abs(pZ - ob.position.z);
 
             if (dx < ob.collider.width / 2 && dz < ob.collider.depth / 2 + 0.3) {
+                // If Shockwave Blast is active, blast right through barriers!
+                if (this.activePowerups.blast.active) {
+                    this.particles.createBlastWave(ob.position);
+                    window.sounds.playCrash();
+                    this.scene.remove(ob);
+                    const idx = this.obstacles.indexOf(ob);
+                    if (idx !== -1) this.obstacles.splice(idx, 1);
+                    this.score += 500;
+                    if (window.ui) window.ui.showToast('💥 OBSTACLE SMASHED!');
+                    continue;
+                }
+
                 if (ob.obstacleType === 'low') {
                     // Low barrier: Must jump over it (pY must be > collider.height)
                     if (pY < ob.collider.height) {
@@ -690,20 +845,25 @@ class MetroGame {
             this.particles.createCrashExplosion(this.player.position);
             if (window.inputManager) window.inputManager.vibrate([60, 50, 60]);
 
+            // Devil surges forward close on stumble!
+            this.devilTargetDist = 1.6;
+            this.cleanRunTimer = 0;
+
             // Stumble recovery: bounce player backward slightly and clear obstacles nearby
             this.playerPos.z += 5;
             this.velocityY = 8;
             this.clearNearbyObstacles(this.playerPos.z, 20);
 
             if (window.ui) {
-                window.ui.showToast('🛹 HOVERBOARD SAVED YOU!');
+                window.ui.showToast('🛹 HOVERBOARD SAVED YOU FROM DEVIL!');
                 window.ui.updatePowerupBar('hoverboard', 0);
             }
             return;
         }
 
-        // Game Over!
+        // Game Over! Devil catches player!
         this.isRunning = false;
+        this.devilTargetDist = 0.5;
         window.sounds.stopMusic();
         window.sounds.playCrash();
         this.particles.createCrashExplosion(this.player.position);

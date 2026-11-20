@@ -14,6 +14,83 @@ class ParticleSystem {
         this.dustMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.6 });
         this.fireMat = new THREE.MeshBasicMaterial({ color: 0xff3b30 });
         this.purpleMat = new THREE.MeshBasicMaterial({ color: 0xaf52de });
+        this.rainGeo = new THREE.BoxGeometry(0.04, 0.7, 0.04);
+        this.rainMat = new THREE.MeshBasicMaterial({ color: 0x80d9ff, transparent: true, opacity: 0.65 });
+        this.devilFlameMat = new THREE.MeshBasicMaterial({ color: 0xff1e00 });
+    }
+
+    createDevilFlames(pos) {
+        for (let i = 0; i < 2; i++) {
+            const mesh = new THREE.Mesh(this.dustGeo, this.devilFlameMat);
+            mesh.position.set(
+                pos.x + (Math.random() - 0.5) * 0.5,
+                pos.y + 0.1,
+                pos.z + (Math.random() - 0.5) * 0.4
+            );
+            const velocity = new THREE.Vector3(
+                (Math.random() - 0.5) * 1.5,
+                2 + Math.random() * 2,
+                4 + Math.random() * 3
+            );
+            this.scene.add(mesh);
+            this.particles.push({
+                mesh,
+                velocity,
+                gravity: 0,
+                rotationSpeed: new THREE.Vector3(4, 4, 4),
+                scaleDecay: 0.86,
+                life: 0.35,
+                maxLife: 0.35
+            });
+        }
+    }
+
+    createBlastWave(pos) {
+        const count = 20;
+        for (let i = 0; i < count; i++) {
+            const mesh = new THREE.Mesh(this.dustGeo, this.fireMat);
+            mesh.position.copy(pos);
+            const angle = (i / count) * Math.PI * 2;
+            const speed = 8 + Math.random() * 6;
+            const velocity = new THREE.Vector3(
+                Math.cos(angle) * speed,
+                Math.sin(angle) * speed,
+                (Math.random() - 0.5) * 6
+            );
+            this.scene.add(mesh);
+            this.particles.push({
+                mesh,
+                velocity,
+                gravity: -6,
+                rotationSpeed: new THREE.Vector3(6, 6, 6),
+                scaleDecay: 0.9,
+                life: 0.6,
+                maxLife: 0.6
+            });
+        }
+    }
+
+    createRainStreak(centerPos) {
+        for (let i = 0; i < 4; i++) {
+            const mesh = new THREE.Mesh(this.rainGeo, this.rainMat);
+            mesh.position.set(
+                centerPos.x + (Math.random() - 0.5) * 18,
+                centerPos.y + 6 + Math.random() * 4,
+                centerPos.z - 5 - Math.random() * 25
+            );
+            mesh.rotation.x = -0.25; // Slanted rain
+            const velocity = new THREE.Vector3(0, -32, 10);
+            this.scene.add(mesh);
+            this.particles.push({
+                mesh,
+                velocity,
+                gravity: 0,
+                rotationSpeed: new THREE.Vector3(0, 0, 0),
+                scaleDecay: 0.98,
+                life: 0.3,
+                maxLife: 0.3
+            });
+        }
     }
 
     createCoinBurst(pos) {

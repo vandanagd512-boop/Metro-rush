@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14111f" />
+      <stop offset="100%" stop-color="#2a0845" />
+    </linearGradient>
+    <linearGradient id="rush" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fff700" />
+      <stop offset="50%" stop-color="#ff5e00" />
+      <stop offset="100%" stop-color="#ff0055" />
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="6" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="110" fill="url(#bg)" />
+  <!-- Rails -->
+  <path d="M 80 500 L 220 220 L 292 220 L 432 500" stroke="#00f0ff" stroke-width="14" fill="none" opacity="0.6"/>
+  <line x1="120" y1="440" x2="392" y2="440" stroke="#ffcc00" stroke-width="12" />
+  <line x1="165" y1="360" x2="347" y2="360" stroke="#ffcc00" stroke-width="10" />
+  <line x1="200" y1="290" x2="312" y2="290" stroke="#ffcc00" stroke-width="8" />
+  <!-- Devil Horns & Runner silhouette -->
+  <path d="M 170 120 Q 200 60 230 110 Q 256 90 282 110 Q 312 60 342 120 Q 360 170 340 210 Q 256 260 172 210 Z" fill="#ff2a2a" filter="url(#glow)"/>
+  <!-- Eyes -->
+  <circle cx="225" cy="155" r="14" fill="#ffee00" />
+  <circle cx="287" cy="155" r="14" fill="#ffee00" />
+  <circle cx="228" cy="155" r="6" fill="#14111f" />
+  <circle cx="290" cy="155" r="6" fill="#14111f" />
+  <!-- Hoverboard -->
+  <ellipse cx="256" cy="420" rx="140" ry="24" fill="#00f0ff" filter="url(#glow)"/>
+  <ellipse cx="256" cy="420" rx="110" ry="14" fill="#ff007f" />
+</svg>

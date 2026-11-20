@@ -566,6 +566,180 @@ html, body {
     color: #000;
 }
 
+/* Combo Badge Tag */
+.hud-combo-tag {
+    background: linear-gradient(90deg, #ff007f 0%, #ff5400 100%);
+    color: #fff;
+    font-family: 'Titan One', cursive;
+    font-size: 0.95rem;
+    padding: 3px 12px;
+    border-radius: 14px;
+    box-shadow: 0 0 10px rgba(255, 0, 127, 0.7);
+    animation: pulse 0.6s infinite alternate;
+}
+
+/* Shop Tabs */
+.shop-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.shop-tab-btn {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 14px;
+    color: #ccc;
+    font-family: 'Fredoka One', cursive;
+    padding: 10px 0;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.shop-tab-btn.active {
+    background: var(--accent-cyan);
+    border-color: var(--accent-cyan);
+    color: #0b132b;
+}
+
+.badge-perk {
+    font-size: 0.75rem;
+    background: var(--accent-purple);
+    color: #fff;
+    padding: 2px 8px;
+    border-radius: 8px;
+    margin-left: 6px;
+}
+
+/* Leaderboard */
+.leaderboard-container {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 55vh;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.leaderboard-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.06);
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    padding: 10px 16px;
+    font-family: 'Fredoka One', cursive;
+}
+
+.leaderboard-row.top-1 {
+    border-color: var(--accent-yellow);
+    background: rgba(255, 204, 0, 0.12);
+}
+
+.lb-rank {
+    font-size: 1.2rem;
+    width: 32px;
+}
+
+.lb-name {
+    flex: 1;
+    text-align: left;
+    margin-left: 10px;
+    color: #fff;
+    font-size: 1.05rem;
+}
+
+.lb-score {
+    color: var(--accent-cyan);
+    font-size: 1.15rem;
+}
+
+/* Lucky Spin Wheel */
+.wheel-wrapper {
+    position: relative;
+    width: 240px;
+    height: 240px;
+    margin: 15px auto;
+}
+
+.wheel-pointer {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 1.8rem;
+    color: var(--accent-yellow);
+    z-index: 10;
+    filter: drop-shadow(0 2px 4px #000);
+}
+
+.wheel-disc {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    border: 6px solid var(--accent-yellow);
+    background: conic-gradient(
+        #ff3b30 0deg 60deg,
+        #00f0ff 60deg 120deg,
+        #ffcc00 120deg 180deg,
+        #9b5de5 180deg 240deg,
+        #06d6a0 240deg 300deg,
+        #ff007f 300deg 360deg
+    );
+    box-shadow: 0 0 25px rgba(255, 204, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.wheel-center-hub {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #14111f;
+    border: 3px solid #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.4rem;
+}
+
+/* Submit score box on Game Over */
+.go-submit-box {
+    display: flex;
+    gap: 8px;
+    margin: 14px 0 6px;
+}
+
+.input-nickname {
+    flex: 2;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.25);
+    border-radius: 16px;
+    color: #fff;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    padding: 10px 14px;
+    outline: none;
+}
+
+.input-nickname:focus {
+    border-color: var(--accent-cyan);
+}
+
+.btn-submit-score {
+    flex: 1;
+    background: var(--accent-cyan);
+    border: none;
+    border-radius: 16px;
+    color: #0b132b;
+    font-family: 'Titan One', cursive;
+    font-size: 0.95rem;
+    cursor: pointer;
+}
+
 /* Animations */
 @keyframes float {
     0%, 100% { transform: translateY(0); }

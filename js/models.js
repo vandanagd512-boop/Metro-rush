@@ -23,7 +23,16 @@ class ModelFactory {
             trainWindow: new THREE.MeshBasicMaterial({ color: 0xa8dadc }),
             headlightOn: new THREE.MeshBasicMaterial({ color: 0xffffe0 }),
             boardBase: new THREE.MeshLambertMaterial({ color: 0x111111 }),
-            boardGlow: new THREE.MeshBasicMaterial({ color: 0x00f0ff })
+            boardGlow: new THREE.MeshBasicMaterial({ color: 0x00f0ff }),
+            devilRed: new THREE.MeshLambertMaterial({ color: 0xd90429 }),
+            devilDark: new THREE.MeshLambertMaterial({ color: 0x590d22 }),
+            devilHorns: new THREE.MeshLambertMaterial({ color: 0x1a1a1a }),
+            devilEyes: new THREE.MeshBasicMaterial({ color: 0xffea00 }),
+            devilTrident: new THREE.MeshLambertMaterial({ color: 0xffb703 }),
+            clockCyan: new THREE.MeshBasicMaterial({ color: 0x00f5d4 }),
+            blastFlame: new THREE.MeshBasicMaterial({ color: 0xff5400 }),
+            mysteryGold: new THREE.MeshLambertMaterial({ color: 0xffd166 }),
+            mysteryRibbon: new THREE.MeshBasicMaterial({ color: 0xf72585 })
         };
     }
 
@@ -179,9 +188,17 @@ class ModelFactory {
         return root;
     }
 
-    createHoverboard(color = 0x00f0ff) {
+    createHoverboard(boardType = 'neon') {
         const board = new THREE.Group();
         board.name = 'hoverboard';
+        board.boardType = boardType;
+
+        let trimColor = 0x00f0ff;
+        if (boardType === 'firestorm') trimColor = 0xff3b30;
+        else if (boardType === 'glider') trimColor = 0xaf52de;
+        else if (boardType === 'bouncer') trimColor = 0x06d6a0;
+
+        const glowMat = new THREE.MeshBasicMaterial({ color: trimColor });
 
         // Main deck
         const deckGeo = new THREE.BoxGeometry(0.75, 0.07, 1.55);
@@ -189,7 +206,6 @@ class ModelFactory {
         board.add(deck);
 
         // Glowing trim edges
-        const glowMat = new THREE.MeshBasicMaterial({ color });
         const trimL = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 1.57), glowMat);
         trimL.position.x = -0.38;
         board.add(trimL);
@@ -208,7 +224,167 @@ class ModelFactory {
         thrusterBack.position.z = -0.45;
         board.add(thrusterBack);
 
+        // Specialty details: Glider wings or fire exhaust
+        if (boardType === 'glider') {
+            const wingGeo = new THREE.BoxGeometry(0.5, 0.02, 0.6);
+            const wingL = new THREE.Mesh(wingGeo, glowMat);
+            wingL.position.set(-0.6, 0, 0);
+            board.add(wingL);
+
+            const wingR = wingL.clone();
+            wingR.position.x = 0.6;
+            board.add(wingR);
+        } else if (boardType === 'firestorm') {
+            const noseGeo = new THREE.ConeGeometry(0.35, 0.5, 4);
+            const nose = new THREE.Mesh(noseGeo, glowMat);
+            nose.rotation.x = -Math.PI / 2;
+            nose.position.set(0, 0, -0.95);
+            board.add(nose);
+        }
+
         return board;
+    }
+
+    // Creates the menacing 3D cartoon Devil chaser
+    createDevil() {
+        const devil = new THREE.Group();
+        devil.name = 'devil_chaser';
+
+        const bodyContainer = new THREE.Group();
+        devil.add(bodyContainer);
+        devil.bodyContainer = bodyContainer;
+
+        // Torso
+        const torsoGeo = new THREE.BoxGeometry(0.75, 0.85, 0.45);
+        const torso = new THREE.Mesh(torsoGeo, this.materials.devilRed);
+        torso.position.y = 1.15;
+        bodyContainer.add(torso);
+
+        // Head
+        const headPivot = new THREE.Group();
+        headPivot.position.set(0, 1.6, 0);
+        bodyContainer.add(headPivot);
+        devil.headPivot = headPivot;
+
+        const headGeo = new THREE.BoxGeometry(0.55, 0.55, 0.48);
+        const head = new THREE.Mesh(headGeo, this.materials.devilRed);
+        head.position.y = 0.28;
+        headPivot.add(head);
+
+        // Horns
+        const hornGeo = new THREE.ConeGeometry(0.12, 0.45, 6);
+        const hornL = new THREE.Mesh(hornGeo, this.materials.devilHorns);
+        hornL.rotation.set(-0.2, 0, -0.35);
+        hornL.position.set(-0.24, 0.65, 0.05);
+        head.add(hornL);
+
+        const hornR = new THREE.Mesh(hornGeo, this.materials.devilHorns);
+        hornR.rotation.set(-0.2, 0, 0.35);
+        hornR.position.set(0.24, 0.65, 0.05);
+        head.add(hornR);
+
+        // Glowing Eyes
+        const eyeGeo = new THREE.BoxGeometry(0.12, 0.08, 0.04);
+        const eyeL = new THREE.Mesh(eyeGeo, this.materials.devilEyes);
+        eyeL.position.set(-0.15, 0.32, -0.25);
+        head.add(eyeL);
+
+        const eyeR = eyeL.clone();
+        eyeR.position.x = 0.15;
+        head.add(eyeR);
+
+        // Devil Wings (Flapping pivot joints)
+        const wingShape = new THREE.BufferGeometry();
+        const wingGeo = new THREE.BoxGeometry(0.7, 0.5, 0.04);
+
+        const wingPivotL = new THREE.Group();
+        wingPivotL.position.set(-0.35, 1.45, 0.22);
+        bodyContainer.add(wingPivotL);
+        devil.wingPivotL = wingPivotL;
+
+        const wingL = new THREE.Mesh(wingGeo, this.materials.devilDark);
+        wingL.position.set(-0.35, 0.2, 0);
+        wingPivotL.add(wingL);
+
+        const wingPivotR = new THREE.Group();
+        wingPivotR.position.set(0.35, 1.45, 0.22);
+        bodyContainer.add(wingPivotR);
+        devil.wingPivotR = wingPivotR;
+
+        const wingR = new THREE.Mesh(wingGeo, this.materials.devilDark);
+        wingR.position.set(0.35, 0.2, 0);
+        wingPivotR.add(wingR);
+
+        // Right Arm holding Golden Trident / Pitchfork
+        const armGeo = new THREE.BoxGeometry(0.18, 0.65, 0.18);
+        const rightArmPivot = new THREE.Group();
+        rightArmPivot.position.set(0.48, 1.4, 0);
+        bodyContainer.add(rightArmPivot);
+        devil.rightArmPivot = rightArmPivot;
+
+        const rightArm = new THREE.Mesh(armGeo, this.materials.devilRed);
+        rightArm.position.y = -0.3;
+        rightArmPivot.add(rightArm);
+
+        // Trident shaft
+        const shaftGeo = new THREE.CylinderGeometry(0.04, 0.04, 1.8, 8);
+        const shaft = new THREE.Mesh(shaftGeo, this.materials.devilTrident);
+        shaft.rotation.x = Math.PI / 4;
+        shaft.position.set(0.1, -0.2, -0.4);
+        rightArmPivot.add(shaft);
+
+        // Trident prongs
+        const prongGeo = new THREE.ConeGeometry(0.06, 0.35, 6);
+        const prongCenter = new THREE.Mesh(prongGeo, this.materials.devilTrident);
+        prongCenter.position.set(0, 0.9, 0);
+        shaft.add(prongCenter);
+
+        const prongLeft = new THREE.Mesh(prongGeo, this.materials.devilTrident);
+        prongLeft.position.set(-0.16, 0.8, 0);
+        shaft.add(prongLeft);
+
+        const prongRight = new THREE.Mesh(prongGeo, this.materials.devilTrident);
+        prongRight.position.set(0.16, 0.8, 0);
+        shaft.add(prongRight);
+
+        // Left Arm
+        const leftArmPivot = new THREE.Group();
+        leftArmPivot.position.set(-0.48, 1.4, 0);
+        bodyContainer.add(leftArmPivot);
+        devil.leftArmPivot = leftArmPivot;
+
+        const leftArm = new THREE.Mesh(armGeo, this.materials.devilRed);
+        leftArm.position.y = -0.3;
+        leftArmPivot.add(leftArm);
+
+        // Devil Tail
+        const tailPivot = new THREE.Group();
+        tailPivot.position.set(0, 0.85, 0.22);
+        bodyContainer.add(tailPivot);
+        devil.tailPivot = tailPivot;
+
+        const tailGeo = new THREE.CylinderGeometry(0.05, 0.03, 0.8, 6);
+        const tail = new THREE.Mesh(tailGeo, this.materials.devilRed);
+        tail.rotation.x = -Math.PI / 3;
+        tail.position.set(0, 0.2, 0.35);
+        tailPivot.add(tail);
+
+        const spadeGeo = new THREE.ConeGeometry(0.12, 0.25, 4);
+        const spade = new THREE.Mesh(spadeGeo, this.materials.devilDark);
+        spade.rotation.x = -Math.PI / 2;
+        spade.position.set(0, 0.45, 0.7);
+        tailPivot.add(spade);
+
+        // Shadow circle
+        const shadowGeo = new THREE.CircleGeometry(0.55, 16);
+        const shadowMat = new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.45 });
+        const shadow = new THREE.Mesh(shadowGeo, shadowMat);
+        shadow.rotation.x = -Math.PI / 2;
+        shadow.position.y = 0.02;
+        devil.add(shadow);
+        devil.shadow = shadow;
+
+        return devil;
     }
 
     createJetpackMesh() {
@@ -389,10 +565,17 @@ class ModelFactory {
         powerup.name = `powerup_${type}`;
         powerup.powerupType = type;
 
+        let bubbleColor = 0xffcc00;
+        if (type === 'magnet') bubbleColor = 0xff0055;
+        else if (type === 'jetpack') bubbleColor = 0x00f0ff;
+        else if (type === 'slowmo') bubbleColor = 0x00f5d4;
+        else if (type === 'blast') bubbleColor = 0xff5400;
+        else if (type === 'mystery') bubbleColor = 0xffd166;
+
         // Glowing outer protective bubble
         const bubbleGeo = new THREE.SphereGeometry(0.65, 16, 16);
         const bubbleMat = new THREE.MeshBasicMaterial({
-            color: type === 'magnet' ? 0xff0055 : (type === 'jetpack' ? 0x00f0ff : 0xffcc00),
+            color: bubbleColor,
             transparent: true,
             opacity: 0.45,
             wireframe: true
@@ -413,6 +596,26 @@ class ModelFactory {
             // "2X" icon badge
             const starGeo = new THREE.DodecahedronGeometry(0.3, 0);
             icon = new THREE.Mesh(starGeo, new THREE.MeshBasicMaterial({ color: 0xffcc00 }));
+        } else if (type === 'slowmo') {
+            // Chrono Clock / Stopwatch
+            const clockGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.1, 16);
+            icon = new THREE.Mesh(clockGeo, this.materials.clockCyan);
+            icon.rotation.x = Math.PI / 2;
+        } else if (type === 'blast') {
+            // Spiky shockwave battery
+            const blastGeo = new THREE.OctahedronGeometry(0.35, 1);
+            icon = new THREE.Mesh(blastGeo, this.materials.blastFlame);
+        } else if (type === 'mystery') {
+            // Mystery gift box with ribbon
+            const box = new THREE.Group();
+            const boxGeo = new THREE.BoxGeometry(0.48, 0.48, 0.48);
+            const boxMesh = new THREE.Mesh(boxGeo, this.materials.mysteryGold);
+            box.add(boxMesh);
+
+            const ribbonGeo = new THREE.BoxGeometry(0.5, 0.5, 0.12);
+            const ribbonMesh = new THREE.Mesh(ribbonGeo, this.materials.mysteryRibbon);
+            box.add(ribbonMesh);
+            icon = box;
         } else {
             // Super sneakers
             const shoeGeo = new THREE.BoxGeometry(0.35, 0.2, 0.5);
