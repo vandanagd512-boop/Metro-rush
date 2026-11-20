@@ -1,5 +1,5 @@
 // Service Worker for 100% Offline PWA Play
-const CACHE_NAME = 'metrorush-cache-v2';
+const CACHE_NAME = 'metrorush-cache-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -13,8 +13,9 @@ const ASSETS_TO_CACHE = [
   './js/game.js',
   './js/ui.js',
   './assets/app-icon.jpg',
-  './assets/icon-192.svg',
-  './assets/icon-512.svg'
+  './assets/app-icon.png',
+  './assets/icon-192.png',
+  './assets/icon-512.png'
 ];
 
 self.addEventListener('install', (event) => {
